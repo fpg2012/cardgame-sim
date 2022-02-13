@@ -1,28 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
 
 type TokenManager struct {
-	tokenToName     map[uint64]string
-	nameToToken     map[string]uint64
-	tokenExpireTime map[uint64]time.Time
+	tokenToName     map[string]string
+	nameToToken     map[string]string
+	tokenExpireTime map[string]time.Time
 }
 
 func NewTokenManager() *TokenManager {
 	token := new(TokenManager)
-	token.nameToToken = make(map[string]uint64)
-	token.tokenToName = make(map[uint64]string)
-	token.tokenExpireTime = make(map[uint64]time.Time)
+	token.nameToToken = make(map[string]string)
+	token.tokenToName = make(map[string]string)
+	token.tokenExpireTime = make(map[string]time.Time)
 	return token
 }
 
-func (tm *TokenManager) AllocateToken(username string) (token uint64, err error) {
+func (tm *TokenManager) AllocateToken(username string) (token string, err error) {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	for {
-		token = uint64(r.Int63())
+		token = fmt.Sprint(uint64(r.Int63()))
 		_, ok := tm.IsTokenUsed(token)
 		if !ok {
 			break
@@ -36,7 +37,7 @@ func (tm *TokenManager) AllocateToken(username string) (token uint64, err error)
 	return
 }
 
-func (tm *TokenManager) IsTokenUsed(token uint64) (string, bool) {
+func (tm *TokenManager) IsTokenUsed(token string) (string, bool) {
 	// check whether token exists
 	username, ok := tm.tokenToName[token]
 	// check whether token expired
@@ -50,12 +51,12 @@ func (tm *TokenManager) IsTokenUsed(token uint64) (string, bool) {
 }
 
 // check whether token and username matches
-func (tm *TokenManager) ValidateToken(token uint64, username string) bool {
+func (tm *TokenManager) ValidateToken(token string, username string) bool {
 	_username, ok1 := tm.IsTokenUsed(token)
 	return ok1 && _username == username
 }
 
-func (tm *TokenManager) ReleaseToken(token uint64) {
+func (tm *TokenManager) ReleaseToken(token string) {
 	username, ok := tm.IsTokenUsed(token)
 	if ok {
 		delete(tm.tokenToName, token)
