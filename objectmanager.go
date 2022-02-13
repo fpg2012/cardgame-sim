@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"log"
+	"sync"
 )
 
 const (
@@ -24,6 +25,7 @@ type DragState struct {
 type ObjectManager struct {
 	Cards        map[string]*CardObject
 	UserDragging map[string]*CardObject
+	mutex        sync.Mutex
 }
 
 func NewObjectManager() *ObjectManager {
@@ -52,6 +54,8 @@ func (om *ObjectManager) GetCard(CID string) (card *CardObject, err error) {
 }
 
 func (om *ObjectManager) StartDragging(UID string, CID string) error {
+	om.mutex.Lock()
+	defer om.mutex.Unlock()
 	card, err := om.GetCard(CID)
 	if err != nil {
 		return err
@@ -75,6 +79,8 @@ func (om *ObjectManager) stopDragging(UID string, CID string) {
 }
 
 func (om *ObjectManager) CancelDragging(UID string, CID string) error {
+	om.mutex.Lock()
+	defer om.mutex.Unlock()
 	card, err := om.GetCard(CID)
 	if err != nil {
 		return err
@@ -86,7 +92,25 @@ func (om *ObjectManager) CancelDragging(UID string, CID string) error {
 	return nil
 }
 
+func (om *ObjectManager) CancelDraggingWithUID(UID string) {
+	card, ok := om.UserDragging[UID]
+	if !ok {
+		return
+	}
+	om.CancelDragging(UID, card.CID)
+}
+
+func (om *ObjectManager) CancelDraggingWithCID(CID string) {
+	card, ok := om.Cards[CID]
+	if !ok {
+		return
+	}
+	om.CancelDragging(card.DragState.UID, card.CID)
+}
+
 func (om *ObjectManager) FinishDragging(UID string, CID string, pos [2]float64) error {
+	om.mutex.Lock()
+	defer om.mutex.Unlock()
 	card, err := om.GetCard(CID)
 	if err != nil {
 		return err

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -78,7 +80,17 @@ func genGetTokenHandler(tm *TokenManager) http.Handler {
 	})
 }
 
+func initLogger() {
+	file := time.Now().Format(time.RFC3339)
+	logFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766)
+	if err != nil {
+		panic(err)
+	}
+	log.SetOutput(logFile)
+}
+
 func main() {
+	// initLogger()
 	log.Println("Hello!")
 
 	tm := NewTokenManager()
@@ -96,5 +108,5 @@ func main() {
 		om,
 	))
 	http.Handle("/token", genGetTokenHandler(tm))
-	http.ListenAndServe("0.0.0.0:6673", nil)
+	http.ListenAndServe("0.0.0.0:6073", nil)
 }

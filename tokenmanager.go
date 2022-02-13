@@ -63,3 +63,11 @@ func (tm *TokenManager) ReleaseToken(token string) {
 		delete(tm.nameToToken, username)
 	}
 }
+
+func (tm *TokenManager) ReleaseTokenWithUsername(username string) {
+	token, ok := tm.nameToToken[username]
+	if !ok {
+		return
+	}
+	tm.ReleaseToken(token)
+}
