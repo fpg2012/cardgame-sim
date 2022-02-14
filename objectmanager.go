@@ -30,8 +30,8 @@ type ObjectManager struct {
 
 func NewObjectManager() *ObjectManager {
 	om := &ObjectManager{
-		Cards:        make(map[string]*CardObject),
-		UserDragging: make(map[string]*CardObject),
+		Cards:        make(map[string]*CardObject, 100),
+		UserDragging: make(map[string]*CardObject, 100),
 	}
 	om.Cards["aaa"] = &CardObject{
 		Position: [2]float64{0., 0.},

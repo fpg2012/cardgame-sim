@@ -11,10 +11,10 @@ type MessageManager struct {
 
 func NewMessageManager() *MessageManager {
 	return &MessageManager{
-		clients:   make(map[string]*Client),
-		Broadcast: make(chan []byte),
-		Login:     make(chan *Client),
-		Logout:    make(chan *Client),
+		clients:   make(map[string]*Client, 100),
+		Broadcast: make(chan []byte, 100),
+		Login:     make(chan *Client, 100),
+		Logout:    make(chan *Client, 100),
 	}
 }
 

@@ -73,6 +73,9 @@ func (c *Client) readPump() {
 					if err != nil {
 						log.Panic(err)
 					}
+					if tosend == nil {
+						log.Panic("to send is empty")
+					}
 					c.Send <- tosend
 					continue
 				}
@@ -111,6 +114,9 @@ func (c *Client) readPump() {
 					if err != nil {
 						log.Panic(err)
 					}
+					if tosend == nil {
+						log.Panic("to send is empty")
+					}
 					c.Send <- tosend
 					continue
 				}
@@ -139,6 +145,9 @@ func (c *Client) writePump() {
 	for {
 		select {
 		case tosend := <-c.Send:
+			if tosend == nil {
+				log.Panic("to send is nil")
+			}
 			c.conn.WriteMessage(websocket.TextMessage, tosend)
 			log.Printf("send(%v): %v", c.UID, string(tosend))
 		case <-ticker.C:
