@@ -50,3 +50,20 @@ type DragFinishFailResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"msg"`
 }
+
+type DragCancelRequest struct {
+	CID string `json:"CID"`
+}
+
+type DragCancelResponse struct {
+	Status string     `json:"status"`
+	Event  string     `json:"event"`
+	CID    string     `json:"cid"`
+	UID    string     `json:"uid"`
+	Pos    [2]float64 `json:"position"`
+}
+
+type DragCancelFailResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"msg"`
+}

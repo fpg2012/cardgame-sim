@@ -47,6 +47,7 @@ func (c *Client) readPump() {
 		if err2 != nil || env.Type == "" {
 			continue
 		}
+		// validate token and UID in envelope
 		ok := c.tm.ValidateToken(env.Token, c.UID) && c.UID == env.UID
 		if !ok {
 			return
@@ -92,7 +93,40 @@ func (c *Client) readPump() {
 			}
 		case "drag_cancel":
 			{
-
+				var req struct {
+					Envelope
+					DragCancelRequest
+				}
+				err := json.Unmarshal(message, &req)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				err2 := c.om.CancelDragging(req.UID, req.CID)
+				if err2 != nil {
+					log.Println(err)
+					tosend, err := json.Marshal(DragCancelFailResponse{
+						Status:  "err",
+						Message: "cannot drag",
+					})
+					if err != nil {
+						log.Panic(err)
+					}
+					c.Send <- tosend
+					continue
+				}
+				card, _ := c.om.GetCard(req.CID)
+				tosend, err := json.Marshal(DragCancelResponse{
+					Status: "ok",
+					Event:  "drag_cancel",
+					CID:    req.CID,
+					UID:    req.UID,
+					Pos:    card.Position,
+				})
+				if err != nil {
+					log.Panic(err)
+				}
+				c.mm.Broadcast <- tosend
 			}
 		case "drag_finish":
 			{
@@ -102,6 +136,7 @@ func (c *Client) readPump() {
 				}
 				err := json.Unmarshal(message, &req)
 				if err != nil {
+					log.Println(err)
 					continue
 				}
 				err2 := c.om.FinishDragging(c.UID, req.CID, req.Pos)
